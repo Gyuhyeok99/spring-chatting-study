@@ -3,6 +3,7 @@ package com.example.chatserver.member.service;
 
 import com.example.chatserver.common.auth.JwtTokenProvider;
 import com.example.chatserver.member.domain.Member;
+import com.example.chatserver.member.dto.MemberListResDto;
 import com.example.chatserver.member.dto.MemberLoginReqDto;
 import com.example.chatserver.member.dto.MemberSaveReqDto;
 import com.example.chatserver.member.dto.MemberSaveResDto;
@@ -13,7 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -50,5 +53,12 @@ public class MemberService {
         loginInfo.put("id", member.getId());
         loginInfo.put("token", jwtToken);
         return loginInfo;
+    }
+
+    @Transactional(readOnly = true)
+    public List<MemberListResDto> findAll(){
+        return memberRepository.findAll().stream()
+                .map(MemberListResDto::from)
+                .toList();
     }
 }
