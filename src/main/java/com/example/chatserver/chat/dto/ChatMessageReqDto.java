@@ -1,6 +1,6 @@
 package com.example.chatserver.chat.dto;
 
-public record ChatMessageDto(
+public record ChatMessageReqDto(
         String message,
         String senderEmail
 ) {
