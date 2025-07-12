@@ -6,6 +6,7 @@ import com.example.chatserver.chat.domain.ChatRoom;
 import com.example.chatserver.chat.domain.ReadStatus;
 import com.example.chatserver.chat.dto.ChatMessageDto;
 import com.example.chatserver.chat.dto.ChatRoomListResDto;
+import com.example.chatserver.chat.dto.MyChatListResDto;
 import com.example.chatserver.chat.repository.ChatMessageRepository;
 import com.example.chatserver.chat.repository.ChatParticipantRepository;
 import com.example.chatserver.chat.repository.ChatRoomRepository;
@@ -18,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -145,5 +147,18 @@ public class ChatService {
         for(ReadStatus readStatus : readStatuses){
             readStatus.updateIsRead(true);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<MyChatListResDto> getMyChatRooms(){
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(()->new EntityNotFoundException("member cannot be found"));
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findAllByMember(member);
+        return chatParticipants.stream()
+                .map(c -> {
+                    long count = readStatusRepository.countByChatRoomAndMemberAndIsReadFalse(c.getChatRoom(), member);
+                    return MyChatListResDto.of(c, count);
+                })
+                .toList();
     }
 }

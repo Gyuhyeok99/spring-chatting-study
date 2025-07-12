@@ -2,6 +2,7 @@ package com.example.chatserver.chat.controller;
 
 import com.example.chatserver.chat.dto.ChatMessageDto;
 import com.example.chatserver.chat.dto.ChatRoomListResDto;
+import com.example.chatserver.chat.dto.MyChatListResDto;
 import com.example.chatserver.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -54,5 +55,11 @@ public class ChatController {
             @PathVariable("roomId") Long roomId){
         chatService.messageRead(roomId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/my/rooms")
+    public ResponseEntity<List<MyChatListResDto>> getMyChatRooms(){
+        List<MyChatListResDto> myChatListResDtos = chatService.getMyChatRooms();
+        return new ResponseEntity<>(myChatListResDtos, HttpStatus.OK);
     }
 }
