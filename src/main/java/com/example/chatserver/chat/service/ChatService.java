@@ -123,4 +123,14 @@ public class ChatService {
                 .map(ChatMessageDto::from)
                 .toList();
     }
+
+    @Transactional
+    public boolean isRoomPaticipant(String email, Long roomId){
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(()-> new EntityNotFoundException("room cannot be found"));
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(()->new EntityNotFoundException("member cannot be found"));
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+        return chatParticipants.stream().anyMatch(cp -> cp.getMember().equals(member));
+    }
 }
