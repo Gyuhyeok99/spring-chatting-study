@@ -4,7 +4,7 @@ import com.example.chatserver.chat.domain.ChatMessage;
 import com.example.chatserver.chat.domain.ChatParticipant;
 import com.example.chatserver.chat.domain.ChatRoom;
 import com.example.chatserver.chat.domain.ReadStatus;
-import com.example.chatserver.chat.dto.ChatMessageReqDto;
+import com.example.chatserver.chat.dto.ChatMessageDto;
 import com.example.chatserver.chat.dto.ChatRoomListResDto;
 import com.example.chatserver.chat.repository.ChatMessageRepository;
 import com.example.chatserver.chat.repository.ChatParticipantRepository;
@@ -32,16 +32,16 @@ public class ChatService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void saveMessage(Long roomId, ChatMessageReqDto chatMessageReqDto){
+    public void saveMessage(Long roomId, ChatMessageDto chatMessageDto){
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(()-> new EntityNotFoundException("room cannot be found"));
-        Member sender = memberRepository.findByEmail(chatMessageReqDto.senderEmail())
+        Member sender = memberRepository.findByEmail(chatMessageDto.senderEmail())
                 .orElseThrow(()-> new EntityNotFoundException("member cannot be found"));
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .member(sender)
-                .content(chatMessageReqDto.message())
+                .content(chatMessageDto.message())
                 .build();
         chatMessageRepository.save(chatMessage);
 
@@ -105,5 +105,22 @@ public class ChatService {
                 .member(member)
                 .build();
         chatParticipantRepository.save(chatParticipant);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatMessageDto> getChatHistory(Long roomId){
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(()-> new EntityNotFoundException("room cannot be found"));
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(()->new EntityNotFoundException("member cannot be found"));
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+
+        if (chatParticipants.stream().noneMatch(cp -> cp.getMember().equals(member))) {
+            throw new IllegalArgumentException("Member is not a participant of this chat room.");
+        }
+
+        return chatMessageRepository.findByChatRoomOrderByCreatedTimeAsc(chatRoom).stream()
+                .map(ChatMessageDto::from)
+                .toList();
     }
 }

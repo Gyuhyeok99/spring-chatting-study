@@ -1,6 +1,6 @@
 package com.example.chatserver.chat.controller;
 
-import com.example.chatserver.chat.dto.ChatMessageReqDto;
+import com.example.chatserver.chat.dto.ChatMessageDto;
 import com.example.chatserver.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +29,9 @@ public class StompController {
     @MessageMapping("/{roomId}")
     public void sendMessage(
             @DestinationVariable Long roomId,
-            @RequestBody ChatMessageReqDto chatMessageReqDto) {
-        log.info("Received message for room {}: {}", roomId, chatMessageReqDto.message());
-        chatService.saveMessage(roomId, chatMessageReqDto);
-        messageTemplate.convertAndSend("/topic/" + roomId, chatMessageReqDto);
+            @RequestBody ChatMessageDto chatMessageDto) {
+        log.info("Received message for room {}: {}", roomId, chatMessageDto.message());
+        chatService.saveMessage(roomId, chatMessageDto);
+        messageTemplate.convertAndSend("/topic/" + roomId, chatMessageDto);
     }
 }

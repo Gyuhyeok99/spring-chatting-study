@@ -1,5 +1,6 @@
 package com.example.chatserver.chat.controller;
 
+import com.example.chatserver.chat.dto.ChatMessageDto;
 import com.example.chatserver.chat.dto.ChatRoomListResDto;
 import com.example.chatserver.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
@@ -39,5 +40,12 @@ public class ChatController {
             @PathVariable("roomId") Long roomId){
         chatService.addParticipantToGroupChat(roomId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/history/{roomId}")
+    public ResponseEntity<List<ChatMessageDto>> getChatHistory(
+            @PathVariable("roomId") Long roomId){
+        List<ChatMessageDto> chatMessageDtos = chatService.getChatHistory(roomId);
+        return new ResponseEntity<>(chatMessageDtos, HttpStatus.OK);
     }
 }
