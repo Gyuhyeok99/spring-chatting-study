@@ -5,6 +5,7 @@ import com.example.chatserver.chat.domain.ChatParticipant;
 import com.example.chatserver.chat.domain.ChatRoom;
 import com.example.chatserver.chat.domain.ReadStatus;
 import com.example.chatserver.chat.dto.ChatMessageReqDto;
+import com.example.chatserver.chat.dto.ChatRoomListResDto;
 import com.example.chatserver.chat.repository.ChatMessageRepository;
 import com.example.chatserver.chat.repository.ChatParticipantRepository;
 import com.example.chatserver.chat.repository.ChatRoomRepository;
@@ -53,6 +54,13 @@ public class ChatService {
                     .build();
             readStatusRepository.save(readStatus);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatRoomListResDto> getGroupchatRooms(){
+        return chatRoomRepository.findByIsGroupChat("Y").stream()
+                .map(ChatRoomListResDto::from)
+                .toList();
     }
 
     @Transactional
