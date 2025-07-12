@@ -30,6 +30,13 @@ public class ChatController {
         return new ResponseEntity<>(chatRooms, HttpStatus.OK);
     }
 
+    @PostMapping("/room/private/create")
+    public ResponseEntity<Long> getOrCreatePrivateRoom(
+            @RequestParam("otherMemberId") Long otherMemberId){
+        Long roomId = chatService.getOrCreatePrivateRoom(otherMemberId);
+        return new ResponseEntity<>(roomId, HttpStatus.OK);
+    }
+
     @PostMapping("/room/group/create")
     public ResponseEntity<Void> createGroupRoom(
             @RequestParam String roomName){

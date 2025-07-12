@@ -19,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,6 +81,28 @@ public class ChatService {
                 .member(member)
                 .build();
         chatParticipantRepository.save(chatParticipant);
+    }
+
+    @Transactional
+    public Long getOrCreatePrivateRoom(Long otherMemberId){
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(()->new EntityNotFoundException("member cannot be found"));
+        Member otherMember = memberRepository.findById(otherMemberId)
+                .orElseThrow(()->new EntityNotFoundException("member cannot be found"));
+
+        Optional<ChatRoom> chatRoom = chatParticipantRepository.findExistingPrivateRoom(member.getId(), otherMember.getId());
+        if(chatRoom.isPresent()){
+            return chatRoom.get().getId();
+        }
+
+        ChatRoom newRoom = ChatRoom.builder()
+                .isGroupChat("N")
+                .name(member.getName() + "-" + otherMember.getName())
+                .build();
+        chatRoomRepository.save(newRoom);
+        addParticipantToRoom(newRoom, member);
+        addParticipantToRoom(newRoom, otherMember);
+        return newRoom.getId();
     }
 
     @Transactional
