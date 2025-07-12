@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -74,6 +75,31 @@ public class ChatService {
                 .build();
         chatRoomRepository.save(chatRoom);
 
+        ChatParticipant chatParticipant = ChatParticipant.builder()
+                .chatRoom(chatRoom)
+                .member(member)
+                .build();
+        chatParticipantRepository.save(chatParticipant);
+    }
+
+    @Transactional
+    public void addParticipantToGroupChat(Long roomId){
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(()-> new EntityNotFoundException("room cannot be found"));
+        Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(()->new EntityNotFoundException("member cannot be found"));
+
+        if(chatRoom.getIsGroupChat().equals("N")){
+            throw new IllegalArgumentException("그룹채팅이 아닙니다.");
+        }
+
+        Optional<ChatParticipant> participant = chatParticipantRepository.findByChatRoomAndMember(chatRoom, member);
+        if(!participant.isPresent()){
+            addParticipantToRoom(chatRoom, member);
+        }
+    }
+
+    private void addParticipantToRoom(ChatRoom chatRoom, Member member){
         ChatParticipant chatParticipant = ChatParticipant.builder()
                 .chatRoom(chatRoom)
                 .member(member)
