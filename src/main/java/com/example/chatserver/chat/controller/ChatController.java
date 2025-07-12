@@ -7,6 +7,7 @@ import com.example.chatserver.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,5 +62,12 @@ public class ChatController {
     public ResponseEntity<List<MyChatListResDto>> getMyChatRooms(){
         List<MyChatListResDto> myChatListResDtos = chatService.getMyChatRooms();
         return new ResponseEntity<>(myChatListResDtos, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/room/group/{roomId}/leave")
+    public ResponseEntity<Void> leaveGroupChatRoom(
+            @PathVariable("roomId") Long roomId){
+        chatService.leaveGroupChatRoom(roomId);
+        return ResponseEntity.ok().build();
     }
 }
